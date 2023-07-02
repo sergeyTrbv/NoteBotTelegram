@@ -8,6 +8,8 @@ public class SuperNoteBotApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SuperNoteBotApplication.class, args);
+
+
     }
 
 }
