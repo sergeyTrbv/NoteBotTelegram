@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
-    private final Pattern pattern = Pattern.compile("(\\d{1,2}\\.\\d{1,2}\\.\\d{4} \\d{1,2}\\:\\d{2})\\s+([А-я\\d\\s\\.,!&:]+)");
+    private final Pattern pattern = Pattern.compile("(\\d{1,2}\\.\\d{1,2}\\.\\d{4} \\d{1,2}\\:\\d{2})\\s+([А-я\\d\\s\\.,!&:-]+)");
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private final TelegramBot telegramBot;
     private final NotificationTaskService notificationTaskService;
@@ -59,9 +59,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
 
                 if ("/start".equals(text)) {
-                    sendMassage(chatId, """
+                    sendMessage(chatId, """
                             Привет
-                            Сделай запись в формате: ДД.ММ.ГГГ ЧЧ:ММ текст
+                            Сделай запись в формате: 01.01.2020 09:00 Выпить кофе
                             И я тебе напомню о твоих планах.
                             """);
                 } else if (text != null) {
@@ -69,18 +69,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     if (matcher.find()) {
                         LocalDateTime dateTime = parse(matcher.group(1));
                         if (Objects.isNull(dateTime)){
-                            sendMassage(chatId,"Некорректный формат даты или времени");
+                            sendMessage(chatId,"Некорректный формат даты или времени");
                         }else {
                             String txt = matcher.group(2);
                             NotificationTask notificationTask = new NotificationTask();
                             notificationTask.setChatId(chatId);
-                            notificationTask.setMassage(txt);
+                            notificationTask.setMessage(txt);
                             notificationTask.setNotificationDateTime(dateTime);
                             notificationTaskService.save(notificationTask);
-                            sendMassage(chatId, "Задача успешно запланирована!");
+                            sendMessage(chatId, "Задача успешно запланирована!");
                         }
                     } else {
-                        sendMassage(chatId, "Некорректный формат сообщения");
+                        sendMessage(chatId, "Некорректный формат сообщения");
                     }
                 }
             });
@@ -101,7 +101,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     }
 
 
-    private void sendMassage(Long chatId, String message) {
+    private void sendMessage(Long chatId, String message) {
         SendMessage sendMessage = new SendMessage(chatId, message);
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {
